@@ -28,6 +28,28 @@ class AppConfig {
     }
   }
 
+  // Sentry DSN por ambiente
+  static String get sentryDsn {
+    switch (current) {
+      case Environment.dev:
+        return ''; // Opcional para desarrollo
+      case Environment.staging:
+        return 'https://examplePublicKey@o0.ingest.sentry.io/0'; // Reemplazar con tu DSN real
+      case Environment.prod:
+        return 'https://examplePublicKey@o0.ingest.sentry.io/0'; // Reemplazar con tu DSN real
+    }
+  }
+
+  // Habilitar crash reporting en producción
+  static bool get enableCrashReporting {
+    return current == Environment.prod || current == Environment.staging;
+  }
+
+  // Habilitar Sentry
+  static bool get enableSentry {
+    return sentryDsn.isNotEmpty;
+  }
+
   static String get bundleId {
     switch (current) {
       case Environment.dev:

@@ -20,6 +20,7 @@ import '/screens/dashboard_screen.dart';
 import '/screens/forgot_password_screen.dart';
 import '/screens/reset_password_screen.dart';
 import '/services/notification_service.dart';
+import '/services/theme_service.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
@@ -56,15 +57,19 @@ void main() async {
   await NotificationService().initialize();
 
   // Ejecutar la app con Sentry
-  await SentryFlutter.init(
-    (options) {
-      options.dsn = 'YOUR_SENTRY_DSN_HERE'; // Reemplazar con tu DSN real
-      options.tracesSampleRate = 1.0;
-      options.environment = AppConfig.current.name;
-      options.release = 'flutter_final@${AppConfig.current.name}';
-    },
-    appRunner: () => runApp(const MyApp()),
-  );
+  if (AppConfig.enableSentry) {
+    await SentryFlutter.init(
+      (options) {
+        options.dsn = AppConfig.sentryDsn;
+        options.tracesSampleRate = 1.0;
+        options.environment = AppConfig.current.name;
+        options.release = 'flutter_final@${AppConfig.current.name}';
+      },
+      appRunner: () => runApp(const MyApp()),
+    );
+  } else {
+    runApp(const MyApp());
+  }
 }
 
 class MyApp extends StatefulWidget {
@@ -77,10 +82,24 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   ThemeMode _themeMode = ThemeMode.system;
 
+  @override
+  void initState() {
+    super.initState();
+    _loadThemePreference();
+  }
+
+  Future<void> _loadThemePreference() async {
+    final savedTheme = await ThemeService.getSavedThemeMode();
+    setState(() {
+      _themeMode = savedTheme;
+    });
+  }
+
   void changeTheme(ThemeMode themeMode) {
     setState(() {
       _themeMode = themeMode;
     });
+    ThemeService.saveThemeMode(themeMode);
   }
 
   @override

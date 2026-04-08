@@ -1,18 +1,23 @@
 // ----------------------------------------
 // lib/services/api_service.dart
 // Servicio base para la comunicación con la API.
-// Maneja los tokens de autorización y el refresco.
+// Maneja los tokens de autorización y el refresco con protección de concurrencia.
 // ----------------------------------------
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '/config/api_config.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'dart:developer' as developer; // Para logs de depuración
+import 'dart:developer' as developer;
+import 'package:synchronized/synchronized.dart';
 
 class ApiService {
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
   static const String _accessTokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
+  
+  // Mutex para evitar múltiples refresh de token simultáneos
+  static final Lock _tokenRefreshLock = Lock();
+  static bool _isRefreshingToken = false;
 
   static Future<String?> getAccessToken() async {
     return await _storage.read(key: _accessTokenKey);
@@ -49,44 +54,58 @@ class ApiService {
     return headers;
   }
 
-  // Método para refrescar el token de acceso
+  // Método para refrescar el token de acceso CON PROTECCIÓN DE CONCURRENCIA
   static Future<bool> _refreshAccessToken() async {
-    final refreshToken = await getRefreshToken();
-    if (refreshToken == null) {
-      developer.log('No refresh token available.', name: 'ApiService');
-      return false;
-    }
+    // Usar mutex para evitar múltiples refreshes simultáneos
+    return await _tokenRefreshLock.synchronized(() async {
+      // Si ya se está refrescando, esperar a que termine
+      if (_isRefreshingToken) {
+        developer.log('Token refresh ya en progreso, esperando...', name: 'ApiService');
+        return true; // Asumir que otro thread lo hizo correctamente
+      }
 
-    try {
-      // Evitar doble slash en la URL
-      final url = Uri.parse('${ApiConfig.baseUrl}/api/auth/refresh/');
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'refresh': refreshToken}),
-      );
+      _isRefreshingToken = true;
 
-      if (response.statusCode == 200) {
-        final responseBody = jsonDecode(response.body);
-        final newAccessToken = responseBody['access'];
-        final newRefreshToken =
-            responseBody['refresh']; // Puede que el refresh token también cambie
-        await saveTokens(newAccessToken, newRefreshToken);
-        developer.log('Token refreshed successfully.', name: 'ApiService');
-        return true;
-      } else {
-        developer.log(
-          'Failed to refresh token: ${response.statusCode} ${response.body}',
-          name: 'ApiService',
+      try {
+        final refreshToken = await getRefreshToken();
+        if (refreshToken == null) {
+          developer.log('No refresh token available.', name: 'ApiService');
+          _isRefreshingToken = false;
+          return false;
+        }
+
+        // Evitar doble slash en la URL
+        final url = Uri.parse('${ApiConfig.baseUrl}/api/auth/refresh/');
+        final response = await http.post(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'refresh': refreshToken}),
         );
-        await deleteTokens(); // Invalida los tokens si el refresh falla
+
+        if (response.statusCode == 200) {
+          final responseBody = jsonDecode(response.body);
+          final newAccessToken = responseBody['access'];
+          final newRefreshToken = responseBody['refresh'];
+          await saveTokens(newAccessToken, newRefreshToken);
+          developer.log('✓ Token refreshed successfully.', name: 'ApiService');
+          _isRefreshingToken = false;
+          return true;
+        } else {
+          developer.log(
+            '✗ Failed to refresh token: ${response.statusCode}',
+            name: 'ApiService',
+          );
+          await deleteTokens();
+          _isRefreshingToken = false;
+          return false;
+        }
+      } catch (e) {
+        developer.log('✗ Exception during token refresh: $e', name: 'ApiService');
+        await deleteTokens();
+        _isRefreshingToken = false;
         return false;
       }
-    } catch (e) {
-      developer.log('Exception during token refresh: $e', name: 'ApiService');
-      await deleteTokens();
-      return false;
-    }
+    });
   }
 
   // Método genérico para manejar solicitudes HTTP con reintento de token
