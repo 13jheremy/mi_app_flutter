@@ -1,0 +1,132 @@
+name: Flutter CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.19.0'
+        channel: 'stable'
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Run tests
+      run: flutter test --coverage
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: coverage/lcov.info
+
+  analyze:
+    name: Analyze Code
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.19.0'
+        channel: 'stable'
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Generate localization
+      run: flutter gen-l10n
+
+    - name: Run analyzer
+      run: flutter analyze
+
+    - name: Check formatting
+      run: flutter format --set-exit-if-changed .
+
+  build-android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    needs: [test, analyze]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.19.0'
+        channel: 'stable'
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Generate localization
+      run: flutter gen-l10n
+
+    - name: Generate launcher icons
+      run: flutter pub run flutter_launcher_icons
+
+    - name: Generate native splash
+      run: flutter pub run flutter_native_splash:create
+
+    - name: Build APK
+      run: flutter build apk --release --split-debug-info=build/app/outputs/symbols
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-release.apk
+        path: build/app/outputs/flutter-apk/app-release.apk
+
+  build-aab:
+    name: Build Android App Bundle
+    runs-on: ubuntu-latest
+    needs: [test, analyze]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.19.0'
+        channel: 'stable'
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Generate localization
+      run: flutter gen-l10n
+
+    - name: Generate launcher icons
+      run: flutter pub run flutter_launcher_icons
+
+    - name: Generate native splash
+      run: flutter pub run flutter_native_splash:create
+
+    - name: Build App Bundle
+      run: flutter build appbundle --release --split-debug-info=build/app/outputs/symbols
+
+    - name: Upload AAB
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-release.aab
+        path: build/app/outputs/bundle/release/app-release.aab

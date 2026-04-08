@@ -43,3 +43,22 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Coverage reports
+coverage/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Firebase config (keep as template)
+/android/app/google-services.json
+
+# Sentry config
+sentry-config.txt
+
+# Build artifacts
+build/
+*.apk
+*.aab

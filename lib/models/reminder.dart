@@ -50,21 +50,26 @@ class Reminder {
       motoId = (json['moto'] as Map<String, dynamic>?)?['id'] as int?;
     }
 
-    // La categoría puede venir como string o como objeto
+    // La categoría puede venir como string, objeto, o como categoria_servicio_nombre (flat)
     String? categoria;
     if (json['categoria'] is String) {
       categoria = json['categoria'] as String?;
+    } else if (json['categoria_servicio_nombre'] is String) {
+      // Serializer 1: flat response with categoria_servicio_nombre
+      categoria = json['categoria_servicio_nombre'] as String?;
     } else if (json['categoria_servicio'] is Map) {
+      // Serializer 2: nested object with categoria_servicio
       categoria =
           (json['categoria_servicio'] as Map<String, dynamic>?)?['nombre']
               as String?;
     } else if (json['categoria'] is Map) {
+      // Fallback: categoria as object
       categoria =
           (json['categoria'] as Map<String, dynamic>?)?['nombre'] as String?;
     }
 
-    // El mensaje puede venir o estar vacío
-    final mensaje = json['mensaje'] as String?;
+    // El mensaje viene como 'notas' del backend (pueden venir ambos, priorizar notas)
+    final mensaje = (json['notas'] ?? json['mensaje']) as String?;
 
     final tipo = json['tipo'] as String?;
     final kmProximo = json['km_proximo'] as int?;

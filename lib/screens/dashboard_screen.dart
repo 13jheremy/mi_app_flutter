@@ -376,14 +376,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                           ),
                           title: Text(
-                            reminder.mensaje ?? 'Sin mensaje',
+                            reminder.mensaje?.isNotEmpty == true
+                                ? reminder.mensaje!
+                                : reminder.categoria ?? 'Recordatorio',
                             style: theme.textTheme.bodyLarge?.copyWith(
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          subtitle: Text(
-                            'Fecha: ${reminder.fechaRecordatorio.toLocal().toIso8601String().substring(0, 10)}',
-                            style: theme.textTheme.bodyMedium,
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Fecha: ${reminder.fechaRecordatorio.toLocal().toIso8601String().substring(0, 10)}',
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                              if (reminder.motoPlaca != null && reminder.motoPlaca!.isNotEmpty)
+                                Text(
+                                  'Moto: ${reminder.motoPlaca}',
+                                  style: theme.textTheme.bodySmall,
+                                ),
+                            ],
                           ),
                         ),
                       );

@@ -171,17 +171,16 @@ class RemindersScreen extends StatelessWidget {
                 // Tipo de recordatorio
                 if (reminder.tipo != null && reminder.tipo!.isNotEmpty) ...[
                   Text(
-                    'Tipo: ${reminder.tipo}',
+                    'Tipo: ${reminder.tipo == 'km' ? 'Por Kilometraje' : reminder.tipo == 'fecha' ? 'Por Fecha' : reminder.tipo}',
                     style: theme.textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 8),
                 ],
 
-                // Mensaje
-                if (reminder.mensaje != null &&
-                    reminder.mensaje!.isNotEmpty) ...[
+                // Notas/Mensaje
+                if (reminder.mensaje != null) ...[
                   Text(
-                    'Mensaje: ${reminder.mensaje}',
+                    'Notas: ${reminder.mensaje!.isEmpty ? '(sin notas adicionales)' : reminder.mensaje}',
                     style: theme.textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 8),

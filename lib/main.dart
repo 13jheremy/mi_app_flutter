@@ -4,8 +4,13 @@
 // ----------------------------------------
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import '/config/theme.dart';
+import '/config/environments.dart';
 import '/providers/auth_provider.dart';
 import '/providers/data_provider.dart';
 import '/providers/product_provider.dart';
@@ -20,13 +25,46 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Configurar manejo de errores global
+  FlutterError.onError = (errorDetails) {
+    if (AppConfig.enableCrashReporting) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    }
+  };
+
+  // Capturar errores de zona
+  PlatformDispatcher.instance.onError = (error, stack) {
+    if (AppConfig.enableCrashReporting) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    }
+    return true;
+  };
+
+  // Inicializar Firebase
+  await Firebase.initializeApp();
+
+  // Inicializar Crashlytics
+  await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(AppConfig.enableCrashReporting);
+
+  // Inicializar Analytics
+  await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
+
   // Configurar manejador de mensajes en segundo plano
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
   // Inicializar servicio de notificaciones
   await NotificationService().initialize();
 
-  runApp(const MyApp());
+  // Ejecutar la app con Sentry
+  await SentryFlutter.init(
+    (options) {
+      options.dsn = 'YOUR_SENTRY_DSN_HERE'; // Reemplazar con tu DSN real
+      options.tracesSampleRate = 1.0;
+      options.environment = AppConfig.current.name;
+      options.release = 'flutter_final@${AppConfig.current.name}';
+    },
+    appRunner: () => runApp(const MyApp()),
+  );
 }
 
 class MyApp extends StatefulWidget {
@@ -60,13 +98,16 @@ class _MyAppState extends State<MyApp> {
         ),
       ],
       child: MaterialApp(
-        title: 'MotoApp',
+        title: AppConfig.appName,
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         themeMode: _themeMode,
         debugShowCheckedModeBanner: false,
         navigatorKey: NotificationService
             .navigatorKey, // Clave de navegación para notificaciones
+        navigatorObservers: [
+          FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance),
+        ],
         localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,

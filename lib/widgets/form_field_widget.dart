@@ -17,6 +17,7 @@ class FormFieldWidget extends StatelessWidget {
   final List<DropdownMenuItem<String>>? dropdownItems;
   final String? dropdownValue;
   final void Function(String?)? onDropdownChanged;
+  final void Function(String)? onChanged;
 
   const FormFieldWidget({
     super.key,
@@ -32,6 +33,7 @@ class FormFieldWidget extends StatelessWidget {
     this.dropdownItems,
     this.dropdownValue,
     this.onDropdownChanged,
+    this.onChanged,
   });
 
   @override
@@ -79,6 +81,7 @@ class FormFieldWidget extends StatelessWidget {
       validator: validator,
       enabled: enabled,
       maxLines: maxLines,
+      onChanged: onChanged,
       style: TextStyle(
         color: isDarkMode ? Colors.white : Colors.grey[900],
       ), // text-gray-900 dark:text-gray-100

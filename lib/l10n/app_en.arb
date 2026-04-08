@@ -1,0 +1,102 @@
+{
+  "appName": "MotoApp",
+  "@appName": {
+    "description": "Application name"
+  },
+  "login": "Login",
+  "@login": {
+    "description": "Login button text"
+  },
+  "email": "Email",
+  "@email": {
+    "description": "Email field label"
+  },
+  "password": "Password",
+  "@password": {
+    "description": "Password field label"
+  },
+  "forgotPassword": "Forgot your password?",
+  "@forgotPassword": {
+    "description": "Forgot password link"
+  },
+  "dashboard": "Dashboard",
+  "@dashboard": {
+    "description": "Dashboard title"
+  },
+  "products": "Products",
+  "@products": {
+    "description": "Products section"
+  },
+  "motorcycles": "Motorcycles",
+  "@motorcycles": {
+    "description": "Motorcycles section"
+  },
+  "maintenance": "Maintenance",
+  "@maintenance": {
+    "description": "Maintenance section"
+  },
+  "sales": "Sales",
+  "@sales": {
+    "description": "Sales section"
+  },
+  "reminders": "Reminders",
+  "@reminders": {
+    "description": "Reminders section"
+  },
+  "profile": "Profile",
+  "@profile": {
+    "description": "User profile section"
+  },
+  "logout": "Logout",
+  "@logout": {
+    "description": "Logout button"
+  },
+  "loading": "Loading...",
+  "@loading": {
+    "description": "Loading text"
+  },
+  "error": "Error",
+  "@error": {
+    "description": "Generic error text"
+  },
+  "success": "Success",
+  "@success": {
+    "description": "Generic success text"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button"
+  },
+  "confirm": "Confirm",
+  "@confirm": {
+    "description": "Confirm button"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Save button"
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Delete button"
+  },
+  "edit": "Edit",
+  "@edit": {
+    "description": "Edit button"
+  },
+  "add": "Add",
+  "@add": {
+    "description": "Add button"
+  },
+  "search": "Search",
+  "@search": {
+    "description": "Search field"
+  },
+  "noData": "No data available",
+  "@noData": {
+    "description": "Message when no data is available"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Retry button"
+  }
+}

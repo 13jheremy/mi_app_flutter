@@ -24,6 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
   List<String> _recentEmails = [];
+  String? _loginError; // Para almacenar errores del backend
 
   @override
   void initState() {
@@ -77,6 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       setState(() {
         _isLoading = true;
+        _loginError = null; // Limpiar error previo
       });
 
       try {
@@ -108,14 +110,10 @@ class _LoginScreenState extends State<LoginScreen> {
       } catch (e) {
         developer.log('Error en login: $e', name: 'LoginScreen', level: 1000);
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString().replaceAll('Exception: ', '')),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        // Guardar el error para mostrar en el UI de forma persistente
+        setState(() {
+          _loginError = e.toString().replaceAll('Exception: ', '');
+        });
       } finally {
         if (!mounted) return;
         setState(() {
@@ -197,6 +195,45 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 20),
+                      
+                      // Banner de error persistente (como en el frontend)
+                      if (_loginError != null)
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.red.withOpacity(isDarkMode ? 0.2 : 0.05),
+                            border: Border.all(
+                              color: Colors.red.withOpacity(isDarkMode ? 0.5 : 0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.error_outline,
+                                color: Colors.red.withOpacity(isDarkMode ? 0.9 : 0.7),
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  _loginError!,
+                                  style: TextStyle(
+                                    color: Colors.red.withOpacity(
+                                      isDarkMode ? 0.9 : 0.7,
+                                    ),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      
                       Text(
                         'Iniciar Sesión',
                         style: theme.textTheme.titleLarge?.copyWith(
@@ -237,6 +274,14 @@ class _LoginScreenState extends State<LoginScreen> {
                               style: TextStyle(
                                 color: isDarkMode ? Colors.white : Colors.black,
                               ),
+                              onChanged: (_) {
+                                // Limpiar error cuando el usuario escriba
+                                if (_loginError != null) {
+                                  setState(() {
+                                    _loginError = null;
+                                  });
+                                }
+                              },
                               onEditingComplete: () =>
                                   _saveEmail(_emailController.text),
                               decoration: InputDecoration(
@@ -336,6 +381,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         label: 'Contraseña',
                         hintText: '••••••••',
                         obscureText: _obscurePassword,
+                        onChanged: (_) {
+                          // Limpiar error cuando el usuario escriba
+                          if (_loginError != null) {
+                            setState(() {
+                              _loginError = null;
+                            });
+                          }
+                        },
                         suffixIcon: IconButton(
                           icon: Icon(
                             _obscurePassword

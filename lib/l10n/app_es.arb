@@ -1,0 +1,102 @@
+{
+  "appName": "MotoApp",
+  "@appName": {
+    "description": "Nombre de la aplicación"
+  },
+  "login": "Iniciar Sesión",
+  "@login": {
+    "description": "Texto del botón de login"
+  },
+  "email": "Correo electrónico",
+  "@email": {
+    "description": "Etiqueta del campo de email"
+  },
+  "password": "Contraseña",
+  "@password": {
+    "description": "Etiqueta del campo de contraseña"
+  },
+  "forgotPassword": "¿Olvidaste tu contraseña?",
+  "@forgotPassword": {
+    "description": "Enlace para recuperar contraseña"
+  },
+  "dashboard": "Panel de Control",
+  "@dashboard": {
+    "description": "Título del dashboard"
+  },
+  "products": "Productos",
+  "@products": {
+    "description": "Sección de productos"
+  },
+  "motorcycles": "Motos",
+  "@motorcycles": {
+    "description": "Sección de motocicletas"
+  },
+  "maintenance": "Mantenimiento",
+  "@maintenance": {
+    "description": "Sección de mantenimiento"
+  },
+  "sales": "Ventas",
+  "@sales": {
+    "description": "Sección de ventas"
+  },
+  "reminders": "Recordatorios",
+  "@reminders": {
+    "description": "Sección de recordatorios"
+  },
+  "profile": "Perfil",
+  "@profile": {
+    "description": "Sección de perfil de usuario"
+  },
+  "logout": "Cerrar Sesión",
+  "@logout": {
+    "description": "Botón para cerrar sesión"
+  },
+  "loading": "Cargando...",
+  "@loading": {
+    "description": "Texto de carga"
+  },
+  "error": "Error",
+  "@error": {
+    "description": "Texto de error genérico"
+  },
+  "success": "Éxito",
+  "@success": {
+    "description": "Texto de éxito genérico"
+  },
+  "cancel": "Cancelar",
+  "@cancel": {
+    "description": "Botón cancelar"
+  },
+  "confirm": "Confirmar",
+  "@confirm": {
+    "description": "Botón confirmar"
+  },
+  "save": "Guardar",
+  "@save": {
+    "description": "Botón guardar"
+  },
+  "delete": "Eliminar",
+  "@delete": {
+    "description": "Botón eliminar"
+  },
+  "edit": "Editar",
+  "@edit": {
+    "description": "Botón editar"
+  },
+  "add": "Agregar",
+  "@add": {
+    "description": "Botón agregar"
+  },
+  "search": "Buscar",
+  "@search": {
+    "description": "Campo de búsqueda"
+  },
+  "noData": "No hay datos disponibles",
+  "@noData": {
+    "description": "Mensaje cuando no hay datos"
+  },
+  "retry": "Reintentar",
+  "@retry": {
+    "description": "Botón para reintentar"
+  }
+}
