@@ -40,72 +40,72 @@ class MotorcyclesScreen extends StatelessWidget {
       body: dataProvider.isLoadingData
           ? Center(child: CircularProgressIndicator(color: theme.primaryColor))
           : dataProvider.errorMessage != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: theme.colorScheme.error,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Error al cargar las motos',
-                        style: theme.textTheme.titleLarge,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        dataProvider.errorMessage!,
-                        style: theme.textTheme.bodyMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () => dataProvider.fetchData(),
-                        child: const Text('Reintentar'),
-                      ),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: theme.colorScheme.error,
                   ),
-                )
-              : dataProvider.motorcycles.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.two_wheeler,
-                            size: 64,
-                            color: theme.primaryColor.withOpacity(0.6),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'No tienes motos registradas.',
-                            style: theme.textTheme.titleLarge,
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            '¡Añade una para empezar a gestionar tus mantenimientos!',
-                            style: theme.textTheme.bodyMedium,
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'Contacta al taller para registrar tus motos.',
-                            style: TextStyle(fontSize: 14, color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(16.0),
-                      itemCount: dataProvider.motorcycles.length,
-                      itemBuilder: (context, index) {
-                        final moto = dataProvider.motorcycles[index];
-                        return _buildMotorcycleCard(context, moto, theme);
-                      },
-                    ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error al cargar las motos',
+                    style: theme.textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    dataProvider.errorMessage!,
+                    style: theme.textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => dataProvider.fetchData(),
+                    child: const Text('Reintentar'),
+                  ),
+                ],
+              ),
+            )
+          : dataProvider.motorcycles.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.two_wheeler,
+                    size: 64,
+                    color: theme.primaryColor.withOpacity(0.6),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No tienes motos registradas.',
+                    style: theme.textTheme.titleLarge,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '¡Añade una para empezar a gestionar tus mantenimientos!',
+                    style: theme.textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Contacta al taller para registrar tus motos.',
+                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                ],
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(16.0),
+              itemCount: dataProvider.motorcycles.length,
+              itemBuilder: (context, index) {
+                final moto = dataProvider.motorcycles[index];
+                return _buildMotorcycleCard(context, moto, theme);
+              },
+            ),
     );
   }
 
@@ -198,32 +198,22 @@ class MotorcyclesScreen extends StatelessWidget {
                   'Kilometraje',
                   '${moto.kilometraje ?? 'N/A'} km',
                 ),
-                if (moto.chasis != null && moto.chasis!.isNotEmpty) ...[
+                if (moto.chassis != null && moto.chassis!.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   _buildInfoRow(
                     theme,
                     Icons.construction,
                     'Chasis',
-                    moto.chasis!,
+                    moto.chassis!,
                   ),
                 ],
                 if (moto.motor != null && moto.motor!.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  _buildInfoRow(
-                    theme,
-                    Icons.settings,
-                    'Motor',
-                    moto.motor!,
-                  ),
+                  _buildInfoRow(theme, Icons.settings, 'Motor', moto.motor!),
                 ],
                 if (moto.color != null && moto.color!.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  _buildInfoRow(
-                    theme,
-                    Icons.palette,
-                    'Color',
-                    moto.color!,
-                  ),
+                  _buildInfoRow(theme, Icons.palette, 'Color', moto.color!),
                 ],
                 if (moto.cilindrada != null && moto.cilindrada != 0) ...[
                   const SizedBox(height: 8),
@@ -242,9 +232,8 @@ class MotorcyclesScreen extends StatelessWidget {
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => MaintenanceScreen(
-                            motorcycleId: moto.id,
-                          ),
+                          builder: (context) =>
+                              MaintenanceScreen(motorcycleId: moto.id),
                         ),
                       );
                     },

@@ -27,33 +27,35 @@ class DataProvider extends ChangeNotifier {
 
   // Método para obtener todos los datos del cliente
   Future<void> fetchData() async {
+    print('=== DataProvider.fetchData INICIADO ===');
     _isLoadingData = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      // Cargar datos usando los endpoints específicos para cliente
-      developer.log('Starting data fetch...', name: 'DataProvider');
+      print('Starting data fetch...');
 
-      // Limpiar datos anteriores para evitar mostrar datos antiguos con valores nulos
+      // Limpiar datos anteriores
       _reminders = [];
       _maintenances = [];
       _motorcycles = [];
       _sales = [];
+      notifyListeners();
 
-      // Primero cargar las motos del cliente
+      // Cargar las motos del cliente
+      print('Antes de llamar a DataService.fetchMotorcycles');
       _motorcycles = await DataService.fetchMotorcycles();
-      developer.log(
-        'Motorcycles loaded: ${_motorcycles.length}',
-        name: 'DataProvider',
-      );
+      print('Despues de fetchMotorcycles - count: ${_motorcycles.length}');
+      if (_motorcycles.isNotEmpty) {
+        print(
+          'Primera moto: ${_motorcycles[0].marca} ${_motorcycles[0].modelo}',
+        );
+      }
+      notifyListeners();
 
-      // Cargar todos los mantenimientos del cliente (no por moto individual)
-      // El endpoint ya filtra por el propietario
+      // Cargar mantenimientos
       try {
-        _maintenances = await DataService.fetchMaintenances(
-          0,
-        ); // 0 = todos los mantenimientos
+        _maintenances = await DataService.fetchMaintenances(0);
         developer.log(
           'Maintenances loaded: ${_maintenances.length}',
           name: 'DataProvider',
@@ -88,7 +90,6 @@ class DataProvider extends ChangeNotifier {
     } catch (e) {
       _errorMessage = 'Error al cargar los datos: $e';
       developer.log('Error in fetchData: $_errorMessage', name: 'DataProvider');
-      // Si hay error, dejar listas vacías para evitar crashes
       _motorcycles = [];
       _maintenances = [];
       _reminders = [];

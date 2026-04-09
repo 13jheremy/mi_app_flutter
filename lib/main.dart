@@ -3,6 +3,7 @@
 // El punto de entrada de la aplicación.
 // ----------------------------------------
 import 'package:flutter/material.dart';
+import 'dart:ui' show PlatformDispatcher;
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -45,7 +46,9 @@ void main() async {
   await Firebase.initializeApp();
 
   // Inicializar Crashlytics
-  await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(AppConfig.enableCrashReporting);
+  await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
+    AppConfig.enableCrashReporting,
+  );
 
   // Inicializar Analytics
   await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
@@ -58,15 +61,12 @@ void main() async {
 
   // Ejecutar la app con Sentry
   if (AppConfig.enableSentry) {
-    await SentryFlutter.init(
-      (options) {
-        options.dsn = AppConfig.sentryDsn;
-        options.tracesSampleRate = 1.0;
-        options.environment = AppConfig.current.name;
-        options.release = 'flutter_final@${AppConfig.current.name}';
-      },
-      appRunner: () => runApp(const MyApp()),
-    );
+    await SentryFlutter.init((options) {
+      options.dsn = AppConfig.sentryDsn;
+      options.tracesSampleRate = 1.0;
+      options.environment = AppConfig.current.name;
+      options.release = 'flutter_final@${AppConfig.current.name}';
+    }, appRunner: () => runApp(const MyApp()));
   } else {
     runApp(const MyApp());
   }

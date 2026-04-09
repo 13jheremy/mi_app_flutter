@@ -28,56 +28,63 @@ class DataService {
   }
 
   static Future<List<Motorcycle>> fetchMotorcycles() async {
-    developer.log(
-      'Fetching motorcycles from /api/cliente/motos/',
-      name: 'DataService',
-    );
-    final response = await ApiService.get('/api/cliente/motos/');
-    developer.log(
-      'Response status: ${response.statusCode}',
-      name: 'DataService',
-    );
-    developer.log('Response body: ${response.body}', name: 'DataService');
+    print('=== fetchMotorcycles INICIADO ===');
+    try {
+      final response = await ApiService.get('api/cliente/motos/');
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      developer.log('Parsed data: $data', name: 'DataService');
-      // El endpoint de cliente devuelve {success: true, data: [...], count: N}
-      if (data['success'] == true) {
-        final motorcyclesJson = _extractList(data['data'] ?? [], '');
-        developer.log(
-          'Motorcycles JSON count: ${motorcyclesJson.length}',
-          name: 'DataService',
-        );
-        developer.log(
-          'Motorcycles JSON first: ${motorcyclesJson.isNotEmpty ? motorcyclesJson[0] : "empty"}',
-          name: 'DataService',
-        );
-        try {
-          final result = motorcyclesJson
-              .map((m) => Motorcycle.fromJson(m))
-              .toList();
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print('Parsed data keys: ${data.keys.toList()}');
+
+        // Verificar si hay error en la respuesta
+        if (data.containsKey('error')) {
+          print('Error del backend: ${data['error']}');
           developer.log(
-            'Parsed motorcycles count: ${result.length}',
+            'Error al obtener motos: ${data['error']}',
             name: 'DataService',
           );
+          return [];
+        }
+
+        if (data['success'] == true && data['data'] != null) {
+          final List<dynamic> motorcyclesJson = data['data'];
+          print('Motorcycles JSON count: ${motorcyclesJson.length}');
+
+          if (motorcyclesJson.isEmpty) {
+            print('No hay motorcycles en la respuesta');
+            developer.log(
+              'El cliente no tiene motos registradas',
+              name: 'DataService',
+            );
+            return [];
+          }
+
+          print('Primera moto raw: ${motorcyclesJson[0]}');
+
+          final result = motorcyclesJson
+              .map((m) => Motorcycle.fromJson(m as Map<String, dynamic>))
+              .toList();
+          print('Parsed motorcycles count: ${result.length}');
+          print(
+            'Primera moto parseada: ${result[0].marca} ${result[0].modelo}',
+          );
           return result;
-        } catch (e, stackTrace) {
-          developer.log('Error parsing motorcycles: $e', name: 'DataService');
-          developer.log('Stack trace: $stackTrace', name: 'DataService');
+        } else {
+          print('Respuesta sin success o sin data');
+          print('data success: ${data['success']}');
+          print('data data: ${data['data']}');
           return [];
         }
       } else {
-        developer.log(
-          'Respuesta inesperada del endpoint cliente/motos: $data',
-          name: 'DataService',
-        );
-        return [];
+        print('Error HTTP: ${response.statusCode}');
+        throw Exception('Error al cargar las motos: ${response.statusCode}');
       }
-    } else {
-      throw Exception(
-        'Error al cargar las motos: ${response.statusCode} ${response.body}',
-      );
+    } catch (e, stackTrace) {
+      print('Error en fetchMotorcycles: $e');
+      print('Stack trace: $stackTrace');
+      return [];
     }
   }
 
@@ -264,11 +271,23 @@ class DataService {
   }
 
   static Future<List<Category>> fetchCategories() async {
+    developer.log('fetchCategories llamado', name: 'DataService');
     final response = await ApiService.get('/api/publico/categorias/');
+    developer.log(
+      'Response status: ${response.statusCode}',
+      name: 'DataService',
+    );
+    developer.log('Response body: ${response.body}', name: 'DataService');
+
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
+      developer.log('Data parsed: $data', name: 'DataService');
       // CORRECTED: Use 'results' as the key to extract the list
       final categoriesJson = _extractList(data, 'results');
+      developer.log(
+        'Categories JSON extracted: ${categoriesJson.length}',
+        name: 'DataService',
+      );
       try {
         return categoriesJson.map((c) => Category.fromJson(c)).toList();
       } catch (e) {

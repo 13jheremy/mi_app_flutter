@@ -19,6 +19,9 @@ dependencies {
     // 🔹 Core library desugaring (para flutter_local_notifications)
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 
+    // Play Core (requerido por Flutter para deferred components)
+    implementation("com.google.android.play:core:1.10.3")
+
     // Add the dependencies for any other desired Firebase products
     // https://firebase.google.com/docs/android/setup#available-libraries
 }
@@ -40,7 +43,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.flutter_final"
-        minSdk = 23
+        minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -49,20 +52,6 @@ android {
     flavorDimensions += "environment"
 
     productFlavors {
-        create("development") {
-            dimension = "environment"
-            applicationIdSuffix = ".dev"
-            versionNameSuffix = "-dev"
-            resValue("string", "app_name", "MotoApp Dev")
-        }
-
-        create("staging") {
-            dimension = "environment"
-            applicationIdSuffix = ".staging"
-            versionNameSuffix = "-staging"
-            resValue("string", "app_name", "MotoApp Staging")
-        }
-
         create("production") {
             dimension = "environment"
             resValue("string", "app_name", "MotoApp")

@@ -18,16 +18,25 @@ class CategoryProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
     try {
+      developer.log(
+        'Iniciando carga de categorías...',
+        name: 'CategoryProvider',
+      );
       _categories = await DataService.fetchCategories();
       developer.log(
-        'Categorías cargadas: ${_categories.length}',
+        'Categorías cargadas exitosamente: ${_categories.length}',
+        name: 'CategoryProvider',
+      );
+      developer.log(
+        'Categorías: ${_categories.map((c) => c.nombre).toList()}',
         name: 'CategoryProvider',
       );
     } catch (e) {
-      _errorMessage = 'Error al cargar categorías: $e';
+      _errorMessage = e.toString();
       developer.log(
         'Error en fetchCategories: $_errorMessage',
         name: 'CategoryProvider',
+        level: 1000,
       );
     } finally {
       _isLoading = false;

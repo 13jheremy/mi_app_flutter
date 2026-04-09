@@ -134,6 +134,15 @@ class Motorcycle {
 
     return json;
   }
+
+  // Getters de compatibilidad para la UI (mapea numeroChasis -> chassis)
+  String? get chassis {
+    return numeroChasis;
+  }
+
+  String? get motor {
+    return numeroMotor;
+  }
 }
 
 // En lib/models/motorcycle.dart

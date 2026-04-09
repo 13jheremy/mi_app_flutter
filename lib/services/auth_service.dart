@@ -32,15 +32,89 @@ class AuthService {
         final responseBody = jsonDecode(response.body);
         return AuthResponse.fromJson(responseBody);
       } else {
-        final errorBody = jsonDecode(response.body);
-        String errorMessage =
-            errorBody['detail'] ?? 'Error de autenticación desconocido';
-        throw Exception('Error de login: $errorMessage');
+        String errorMessage = _parseLoginError(response);
+        throw Exception(errorMessage);
       }
     } catch (e) {
+      // Si ya es una excepción con mensaje, rethrow
+      if (e.toString().contains('Exception:')) {
+        rethrow;
+      }
+      // Manejar errores de red
       developer.log('Error en AuthService.login: $e', name: 'AuthService');
-      rethrow;
+      throw Exception('Error de conexión. Verifica tu internet.');
     }
+  }
+
+  // Método para parsear errores de login similar al frontend
+  static String _parseLoginError(dynamic response) {
+    String errorMessage;
+    try {
+      final errorBody = jsonDecode(response.body);
+      final statusCode = response.statusCode;
+
+      // Manejar según código de estado HTTP
+      if (statusCode == 401) {
+        // Verificar si hay mensajes específicos de lockout
+        if (errorBody is Map && errorBody['locked'] == true) {
+          errorMessage =
+              errorBody['error'] ?? 'Cuenta bloqueada por demasiados intentos';
+        } else if (errorBody is Map && errorBody['detail']) {
+          errorMessage = errorBody['detail'].toString();
+        } else {
+          errorMessage = 'Usuario o contraseña incorrectos';
+        }
+      } else if (statusCode == 400) {
+        if (errorBody is Map) {
+          if (errorBody.containsKey('non_field_errors')) {
+            errorMessage = (errorBody['non_field_errors'] as List).join(', ');
+          } else if (errorBody.containsKey('correo_electronico')) {
+            errorMessage = (errorBody['correo_electronico'] as List).join(', ');
+          } else if (errorBody.containsKey('password')) {
+            errorMessage = (errorBody['password'] as List).join(', ');
+          } else if (errorBody.containsKey('detail')) {
+            errorMessage = errorBody['detail'].toString();
+          } else {
+            final firstKey = errorBody.keys.first;
+            final firstValue = errorBody[firstKey];
+            errorMessage = firstValue is List
+                ? firstValue.join(', ')
+                : firstValue.toString();
+          }
+        } else {
+          errorMessage = 'Datos de acceso inválidos';
+        }
+      } else if (statusCode == 403) {
+        errorMessage = 'Cuenta desactivada o sin permisos';
+      } else if (statusCode >= 500) {
+        errorMessage = 'Error del servidor. Intenta más tarde';
+      } else {
+        // Para otros códigos, parsear el cuerpo genérico
+        if (errorBody is Map) {
+          if (errorBody.containsKey('detail')) {
+            errorMessage = errorBody['detail'].toString();
+          } else if (errorBody.containsKey('non_field_errors')) {
+            errorMessage = (errorBody['non_field_errors'] as List).join(', ');
+          } else {
+            final firstKey = errorBody.keys.first;
+            final firstValue = errorBody[firstKey];
+            errorMessage = firstValue is List
+                ? firstValue.join(', ')
+                : firstValue.toString();
+          }
+        } else {
+          errorMessage = response.body.isNotEmpty
+              ? response.body
+              : 'Error al iniciar sesión';
+        }
+      }
+    } catch (_) {
+      // Si no se puede parsear como JSON, usar el body como texto
+      errorMessage = response.body.isNotEmpty
+          ? response.body
+          : 'Error de autenticación';
+    }
+    return errorMessage;
   }
 
   // 🔑 Obtener perfil del usuario logueado

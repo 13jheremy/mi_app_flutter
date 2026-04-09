@@ -10,6 +10,38 @@ import 'dart:developer' as developer;
 import '/providers/auth_provider.dart';
 import '/widgets/form_field_widget.dart';
 
+void _showSnackBar(
+  BuildContext context,
+  String message, {
+  bool isError = true,
+}) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Row(
+        children: [
+          Icon(
+            isError ? Icons.error_outline : Icons.check_circle_outline,
+            color: Colors.white,
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(color: Colors.white, fontSize: 14),
+            ),
+          ),
+        ],
+      ),
+      backgroundColor: isError ? Colors.red[700] : Colors.green[700],
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      margin: const EdgeInsets.all(16),
+      duration: const Duration(seconds: 4),
+    ),
+  );
+}
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -110,9 +142,32 @@ class _LoginScreenState extends State<LoginScreen> {
       } catch (e) {
         developer.log('Error en login: $e', name: 'LoginScreen', level: 1000);
         if (!mounted) return;
+
+        String errorMessage = e.toString().replaceAll('Exception: ', '');
+
+        // Personalizar mensajes de error comunes
+        final lowerError = errorMessage.toLowerCase();
+        if (lowerError.contains('invalid') ||
+            lowerError.contains('credentials') ||
+            lowerError.contains('password')) {
+          errorMessage = 'Correo electrónico o contraseña incorrectos';
+        } else if (lowerError.contains('email') ||
+            lowerError.contains('correo')) {
+          errorMessage = 'El correo electrónico no está registrado';
+        } else if (lowerError.contains('network') ||
+            lowerError.contains('conexión')) {
+          errorMessage = 'Error de conexión. Verifica tu internet';
+        } else if (lowerError.contains('server') ||
+            lowerError.contains('servidor')) {
+          errorMessage = 'Error del servidor. Intenta más tarde';
+        }
+
+        // Mostrar SnackBar con mensaje de error
+        _showSnackBar(context, errorMessage, isError: true);
+
         // Guardar el error para mostrar en el UI de forma persistente
         setState(() {
-          _loginError = e.toString().replaceAll('Exception: ', '');
+          _loginError = errorMessage;
         });
       } finally {
         if (!mounted) return;
@@ -195,7 +250,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      
+
                       // Banner de error persistente (como en el frontend)
                       if (_loginError != null)
                         Container(
@@ -203,9 +258,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8),
-                            color: Colors.red.withOpacity(isDarkMode ? 0.2 : 0.05),
+                            color: Colors.red.withOpacity(
+                              isDarkMode ? 0.2 : 0.05,
+                            ),
                             border: Border.all(
-                              color: Colors.red.withOpacity(isDarkMode ? 0.5 : 0.3),
+                              color: Colors.red.withOpacity(
+                                isDarkMode ? 0.5 : 0.3,
+                              ),
                               width: 1,
                             ),
                           ),
@@ -214,7 +273,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             children: [
                               Icon(
                                 Icons.error_outline,
-                                color: Colors.red.withOpacity(isDarkMode ? 0.9 : 0.7),
+                                color: Colors.red.withOpacity(
+                                  isDarkMode ? 0.9 : 0.7,
+                                ),
                                 size: 20,
                               ),
                               const SizedBox(width: 8),
@@ -233,7 +294,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ],
                           ),
                         ),
-                      
+
                       Text(
                         'Iniciar Sesión',
                         style: theme.textTheme.titleLarge?.copyWith(

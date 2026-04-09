@@ -40,11 +40,6 @@ class AppConfig {
     }
   }
 
-  // Habilitar crash reporting en producción
-  static bool get enableCrashReporting {
-    return current == Environment.prod || current == Environment.staging;
-  }
-
   // Habilitar Sentry
   static bool get enableSentry {
     return sentryDsn.isNotEmpty;
@@ -65,7 +60,8 @@ class AppConfig {
     return current != Environment.prod;
   }
 
+  // Habilitar crash reporting en producción y staging
   static bool get enableCrashReporting {
-    return true; // Habilitado en todos los entornos
+    return current == Environment.prod || current == Environment.staging;
   }
 }

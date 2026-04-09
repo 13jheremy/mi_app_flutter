@@ -14,7 +14,7 @@ class ApiService {
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
   static const String _accessTokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
-  
+
   // Mutex para evitar múltiples refresh de token simultáneos
   static final Lock _tokenRefreshLock = Lock();
   static bool _isRefreshingToken = false;
@@ -49,6 +49,15 @@ class ApiService {
       String? token = await getAccessToken();
       if (token != null) {
         headers['Authorization'] = 'Bearer $token';
+        developer.log(
+          '🔐 Token agregado a headers - primeros 20 chars: ${token.substring(0, token.length > 20 ? 20 : token.length)}',
+          name: 'ApiService',
+        );
+      } else {
+        developer.log(
+          '⚠️ No hay token disponible para esta solicitud',
+          name: 'ApiService',
+        );
       }
     }
     return headers;
@@ -60,7 +69,10 @@ class ApiService {
     return await _tokenRefreshLock.synchronized(() async {
       // Si ya se está refrescando, esperar a que termine
       if (_isRefreshingToken) {
-        developer.log('Token refresh ya en progreso, esperando...', name: 'ApiService');
+        developer.log(
+          'Token refresh ya en progreso, esperando...',
+          name: 'ApiService',
+        );
         return true; // Asumir que otro thread lo hizo correctamente
       }
 
@@ -100,7 +112,10 @@ class ApiService {
           return false;
         }
       } catch (e) {
-        developer.log('✗ Exception during token refresh: $e', name: 'ApiService');
+        developer.log(
+          '✗ Exception during token refresh: $e',
+          name: 'ApiService',
+        );
         await deleteTokens();
         _isRefreshingToken = false;
         return false;
